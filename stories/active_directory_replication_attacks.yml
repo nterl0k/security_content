@@ -3,9 +3,16 @@ id: 891ce3c1-5848-46b5-8ec7-1811992f2aba
 version: 1
 date: '2022-11-26'
 author: Steven Dick
-description: UPDATE_DESCRIPTION
-narrative: UPDATE_NARRATIVE
-references: []
+description: Monitor for activities and techniques related to the abuse of replication functionality with Active Directory environment.
+narrative: This analytic story provides detections for certian high impact attacks against an Active Directory environment, including DCSync and DCShadow. 
+  These attacks abuse the built-in directory service replication function of Active Directory. Once an attacker gains suffiencent rights or access 
+  within an Active Directory environmennt, they may attempt to further exploit this access to gain additional credentials or complete other objectives. 
+references:
+- https://adsecurity.org/?p=1729
+- https://blog.alsid.eu/dcshadow-explained-4510f52fc19d
+- https://www.dcshadow.com/
+- https://attack.mitre.org/techniques/T1003/006/
+- https://attack.mitre.org/techniques/T1207/
 tags:
   analytic_story: Active Directory Replication Attacks
   category:
