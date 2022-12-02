@@ -25,7 +25,10 @@ values(EventCode) as signature by src_user,dest
 | `security_content_ctime(firstTime)` 
 | `security_content_ctime(lastTime)`
 | `detect_possible_dcsync_attack_filter`'
-how_to_implement: UPDATE_HOW_TO_IMPLEMENT
+how_to_implement: To successfully implement this detection you must ingest Windows EventID 4662 from environment domain
+controllers. Enable "Audit Directory Service Access" on domain controllers to log this event.
+
+Caution this event is known to be high-volume, recommend post-implementation filtering at the Forwarding layer.
 known_false_positives: Addition of legitimate replication accounts, usage of some legitimate admin tools (DCInternals)
 references:
 - https://adsecurity.org/?p=1729
