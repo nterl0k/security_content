@@ -28,6 +28,7 @@ references:
 tags:
   analytic_story:
   - Active Directory Replication Attacks
+  - Credential Dumping
   asset_type: endpoint
   cis20:
   - CIS 4
@@ -50,11 +51,11 @@ tags:
   nist:
   - DE.CM
   observable:
-  - name: SubjectUserName
+  - name: src_user
     type: User
     role:
     - Attacker
-  - name: Computer
+  - name: dest
     type: Hostname
     role:
     - Victim
