@@ -3,48 +3,71 @@ id: 14b302e0-84f7-458d-a131-683ecf7cd775
 version: 1
 date: '2022-11-26'
 author: Steven Dick
-type: Correlation
-datamodel:
-- Endpoint_AccountManagement (SSA)
-- Change
-description: UPDATE_DESCRIPTION
-search: '| UPDATE_SPL | `detect_possible_dcshadow_attack_filter`'
-how_to_implement: UPDATE_HOW_TO_IMPLEMENT
-known_false_positives: UPDATE_KNOWN_FALSE_POSITIVES
+type: TTP
+datamodel: []
+description: This search looks for evidence of unexpected account changes that add the 
+"GC/" or "E3514235–4B06–11D1-AB04–00C04FC2DCD2" GUID to the SPN of an Active Directory account. 
+Typically this access is only granted to Domain Controller objects. Any detections granted to a 
+non-domain controller object may indicate the usage of the "DCShadow" attacker technique which
+allows attackers to push information into Active Directory.
+
+search: '`wineventlog_security` EventCode=4742 ServicePrincipalNames IN ("*GC/*","*E3514235–4B06–11D1-AB04–00C04FC2DCD2*")
+| stats count latest(ServicePrincipalNames) as object latest(object_file_name) as object_file_name min(_time) as firstTime max(_time) 
+as lastTime values(EventCode) as signature_id values(reason) as signature by src_user,user,dvc
+| eval dest=CASE(match(user,"\$"),rtrim(user,"$"),true(),dvc)
+| `security_content_ctime(firstTime)` 
+| `security_content_ctime(lastTime)`
+| `detect_possible_dcshadow_attack_filter`'
+how_to_implement: To successfully implement this detection you must ingest Computer Account Create/Change events from the
+environment domain controllers. Enabling success/failure audit in the "Audit Computer Account Management" category will allow this.
+known_false_positives: New domain controller added to environment, legitimate tools run by administrators.
 references:
-- REFERENCE
+- https://www.dcshadow.com/
+- https://blog.alsid.eu/dcshadow-explained-4510f52fc19d 
+- https://attack.mitre.org/techniques/T1207
 tags:
   analytic_story:
-  - UPDATE_STORY_NAME
-  asset_type: UPDATE asset_type
+  - Active Directory Replication Attacks
+  asset_type: endpoint
   cis20:
-  - CIS 3
+  - CIS 4
   - CIS 5
-  - CIS 16
-  confidence: UPDATE value between 1-100
+  - CIS 6
+  confidence: 90
   context:
-  - Update context
+  - Source:Endpoint
+  - Stage:Defense Evasion
+  - Stage:Privilege Escalation
   dataset:
   - UPDATE_DATASET_URL
-  impact: UPDATE value between 1-100
+  impact: 90
   kill_chain_phases:
   - Exploitation
   - Actions on Objectives
-  message: UPDATE message
+  message: AD replication permissions granted on $dest$ by $src_user$. This could be indicative of credential dumping or defense evasion and should be investigated. 
   mitre_attack_id:
   - T1207
   nist:
   - DE.CM
   observable:
-  - name: UPDATE
-    type: UPDATE
+  - name: SubjectUserName
+    type: User
     role:
-    - UPDATE
+    - Attacker
+  - name: Computer
+    type: Hostname
+    role:
+    - Victim
   product:
   - Splunk Enterprise
   - Splunk Enterprise Security
   - Splunk Cloud
   required_fields:
-  - UPDATE
-  risk_score: UPDATE (impact * confidence)/100
+  - _time
+  - EventCode
+  - ServicePrincipalNames
+  - src_user
+  - user
+  - dvc
+  risk_score: 90
   security_domain: endpoint
